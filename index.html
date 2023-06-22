@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Server-Timing As Generic Trailer</title>
+  <style>
+    body {
+      margin: 2rem auto;
+      max-width: 80ch;
+    }
+    tbody {
+      font-family: monospace;
+    }
+    thead {
+      background-color: lightblue;
+      text-align: left;
+    }
+    th, td {
+      padding: 0.5rem;
+    }
+    iframe {
+      border: 1px solid cornflowerblue;
+      height: 60px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Server-Timing As Generic Trailer</h1>
+  <p>
+    The server timing events we're getting:
+  </p>
+  <table>
+    <thead>
+      <tr>
+        <th>name</th>
+        <th>description</th>
+        <th>duration</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+  <p>Resource without <code>Server-Timing</code>:</p>
+  <iframe src="/regular" frameborder="0"></iframe>
+  <p>Resource with a <code>Server-Timing</code> <em>header</em>:</p>
+  <iframe src="/header" frameborder="0"></iframe>
+  <p>Resource with a <code>Server-Timing</code> <em>trailer</em>:</p>
+  <iframe src="/trailer" frameborder="0"></iframe>
+  <!--
+    - regular resource
+    - with header
+    - with trailer
+   -->
+  <script>
+    const tbl = document.querySelector('tbody');
+    const obs = new PerformanceObserver((list) => {
+      list.getEntries().forEach((entry) => {
+        console.warn(`entry…`, entry);
+        entry.serverTiming.forEach((se) => {
+          console.warn(`server timing`);
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td>${se.name}</td><td>${se.description}</td><td>${se.duration}</td>`;
+          tbl.append(tr);
+        });
+      });
+    });
+    obs.observe({ type: 'resource', buffered: true });
+    console.warn(`observing…`);
+  </script>
+</body>
+</html>
